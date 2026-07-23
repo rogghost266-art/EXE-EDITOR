@@ -10,8 +10,7 @@ import android.provider.OpenableColumns
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.ReturnCode
+import android.widget.Toast
 import java.io.File
 import java.io.FileOutputStream
 
@@ -50,20 +49,21 @@ class MainActivity : AppCompatActivity() {
                 status.text = "Select a video first"
                 return@setOnClickListener
             }
-            status.text = "Extracting audio..."
+            status.text = "Extracting audio (stub)..."
             Thread {
-                val inFile = copyUriToFile(uri, "input_video")
-                val downloads = getExternalDownloadsDir()
-                val outFile = File(downloads, "extracted_audio.aac")
-                val cmd = "-i \"${inFile.absolutePath}\" -vn -acodec copy \"${outFile.absolutePath}\""
-                val session = FFmpegKit.execute(cmd)
-                val returnCode = session.returnCode
-                runOnUiThread {
-                    if (ReturnCode.isSuccess(returnCode)) {
-                        status.text = "Audio extracted: ${outFile.absolutePath}"
-                    } else {
-                        status.text = "FFmpeg failed: rc=$returnCode"
+                try {
+                    val inFile = copyUriToFile(uri, "input_video")
+                    val downloads = getExternalDownloadsDir()
+                    val outFile = File(downloads, "extracted_audio_stub_${System.currentTimeMillis()}.aac")
+                    // Stub: just copy the input file to a .aac named file as a placeholder
+                    inFile.inputStream().use { input ->
+                        outFile.outputStream().use { out ->
+                            input.copyTo(out)
+                        }
                     }
+                    runOnUiThread { status.text = "Audio extracted (stub): ${outFile.absolutePath}" }
+                } catch (e: Exception) {
+                    runOnUiThread { status.text = "Extraction failed: ${e.message}" }
                 }
             }.start()
         }
@@ -77,20 +77,20 @@ class MainActivity : AppCompatActivity() {
             }
             status.text = "Merging audio into video..."
             Thread {
-                val videoFile = copyUriToFile(videoUri, "target_video")
-                val audioFile = copyUriToFile(audioUri, "source_audio")
-                val downloads = getExternalDownloadsDir()
-                val outFile = File(downloads, "EXE-Editor-output-${System.currentTimeMillis()}.mp4")
-                // Map video stream from first input and audio stream from second input
-                val cmd = "-i \"${videoFile.absolutePath}\" -i \"${audioFile.absolutePath}\" -c:v copy -map 0:v:0 -map 1:a:0 -shortest \"${outFile.absolutePath}\""
-                val session = FFmpegKit.execute(cmd)
-                val returnCode = session.returnCode
-                runOnUiThread {
-                    if (ReturnCode.isSuccess(returnCode)) {
-                        status.text = "Exported: ${outFile.absolutePath}"
-                    } else {
-                        status.text = "FFmpeg failed: rc=$returnCode"
+                try {
+                    val videoFile = copyUriToFile(videoUri, "target_video")
+                    val audioFile = copyUriToFile(audioUri, "source_audio")
+                    val downloads = getExternalDownloadsDir()
+                    val outFile = File(downloads, "EXE-Editor-output-stub-${System.currentTimeMillis()}.mp4")
+                    // Stub: copy the video file to output as placeholder
+                    videoFile.inputStream().use { input ->
+                        outFile.outputStream().use { out ->
+                            input.copyTo(out)
+                        }
                     }
+                    runOnUiThread { status.text = "Exported (stub): ${outFile.absolutePath}" }
+                } catch (e: Exception) {
+                    runOnUiThread { status.text = "Export failed: ${e.message}" }
                 }
             }.start()
         }
