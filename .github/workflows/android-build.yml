@@ -1,0 +1,53 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Gradle
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gradle
+
+      - name: Build debug APK
+        working-directory: android-app
+        run: |
+          gradle assembleDebug --no-daemon --console=plain
+
+      - name: Find APK
+        run: |
+          APK_PATH=$(find android-app/app/build/outputs/apk -name "*.apk" | head -n1)
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v0.1.0
+          release_name: EXE-Editor APK
+          body: Automated debug APK build
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.APK_PATH }}
+          asset_name: EXE-Editor-debug.apk
+          asset_content_type: application/vnd.android.package-archive
