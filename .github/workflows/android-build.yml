@@ -22,10 +22,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gradle
 
-      - name: Build debug APK
+      - name: Set up Android SDK
+        uses: r0adkll/setup-android@v2
+        with:
+          api-level: 33
+          build-tools: 33.0.2
+          components: platform-tools,build-tools;33.0.2,platforms;android-33
+
+      - name: Generate Gradle wrapper
         working-directory: android-app
-        run: |
-          gradle assembleDebug --no-daemon --console=plain
+        run: gradle wrapper
+
+      - name: Build debug APK (wrapper)
+        working-directory: android-app
+        run: ./gradlew assembleDebug --no-daemon --console=plain
 
       - name: Find APK
         run: |
