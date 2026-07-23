@@ -13,9 +13,27 @@
         android:textSize="18sp" />
 
     <Button
-        android:id="@+id/runButton"
+        android:id="@+id/pickVideoButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Extract audio (sample)" />
+        android:text="Pick video" />
+
+    <Button
+        android:id="@+id/pickAudioButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pick audio" />
+
+    <Button
+        android:id="@+id/extractButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Extract audio from selected video" />
+
+    <Button
+        android:id="@+id/overlayButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Overlay selected audio on selected video" />
 
 </LinearLayout>
